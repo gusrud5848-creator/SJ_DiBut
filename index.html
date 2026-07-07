@@ -10,18 +10,19 @@
         .container { width: 100%; max-width: 500px; background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
         h1 { color: var(--primary-color); text-align: center; font-size: 1.6rem; margin-top: 0; }
         .notice-box { background: #fff5f5; border-left: 4px solid var(--accent-color); padding: 15px; border-radius: 8px; font-size: 0.9rem; margin-bottom: 25px; line-height: 1.6; }
-        .tab-menu { display: flex; gap: 8px; margin-bottom: 25px; }
-        .tab-menu button { flex: 1; padding: 12px 5px; border: none; background: #eee; cursor: pointer; border-radius: 10px; font-weight: bold; color: #666; transition: 0.3s; font-size: 0.85rem; }
+        .tab-menu { display: flex; gap: 10px; margin-bottom: 25px; }
+        .tab-menu button { flex: 1; padding: 14px; border: none; background: #eee; cursor: pointer; border-radius: 10px; font-weight: bold; color: #666; transition: 0.3s; font-size: 0.85rem; }
         .tab-menu button.active { background: var(--primary-color); color: white; }
         .tab-menu button#tab-admin.active { background: var(--admin-color); }
         .section { display: none; }
         .section.active { display: block; }
-        .input-label { display: block; font-weight: bold; font-size: 0.9rem; margin-bottom: 8px; color: #333; }
+        .input-label { display: block; font-weight: bold; font-size: 0.95rem; margin-bottom: 8px; color: #333; }
         .id-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 20px; }
-        input { width: 100%; padding: 14px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; font-size: 1rem; outline: none; margin-bottom: 15px; }
-        .main-btn { width: 100%; padding: 18px; background: var(--primary-color); color: white; border: none; border-radius: 12px; font-size: 1.1rem; cursor: pointer; font-weight: bold; margin-top: 10px; }
+        input { width: 100%; padding: 14px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; font-size: 1rem; outline: none; }
+        .main-btn { width: 100%; padding: 18px; background: var(--primary-color); color: white; border: none; border-radius: 12px; font-size: 1.1rem; cursor: pointer; font-weight: bold; margin-top: 15px; }
         .status-card { background: #f0f7ff; border: 2px dashed var(--primary-color); padding: 20px; border-radius: 15px; margin-top: 20px; text-align: center; display: none; }
-        .admin-list-item { display: flex; justify-content: space-between; padding: 12px; border-bottom: 1px solid #eee; font-size: 0.9rem; }
+        .admin-list-item { display: flex; justify-content: space-between; padding: 12px; border-bottom: 1px solid #eee; font-size: 0.9rem; align-items: center; }
+        /* 로딩 애니메이션 */
         .loading-overlay { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.85); z-index:999; flex-direction:column; justify-content:center; align-items:center; }
         .spinner { border: 4px solid #f3f3f3; border-top: 4px solid var(--primary-color); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
@@ -29,7 +30,7 @@
 </head>
 <body>
 
-<div id="loading" class="loading-overlay"><div class="spinner"></div><p>처리 중입니다...</p></div>
+<div id="loading" class="loading-overlay"><div class="spinner"></div><p id="loading-text">처리 중입니다...</p></div>
 
 <div class="container">
     <h1>📱 2026 디벗 대여 시스템</h1>
@@ -37,31 +38,28 @@
     <div id="main-ui">
         <div class="notice-box">
             <strong>[이용 안내]</strong><br>
-            • 이용 가능 시간: 07:00 ~ 24:00 (월~일)<br>
-            • 반납: 다음 날 조례 시간까지 반드시 완료
+            • 대여 시간: 07:00 ~ 24:00 (월~일)<br>
+            • <strong>반납: 다음 날 조례 시간까지 반드시 완료</strong>
         </div>
 
         <div class="tab-menu">
             <button onclick="showSection('rent')" id="tab-rent" class="active">대여하기</button>
-            <button onclick="showSection('return')" id="tab-return">현황/반납</button>
+            <button onclick="showSection('return')" id="tab-return">현황 조회/반납</button>
             <button onclick="showSection('admin')" id="tab-admin">학급 현황</button>
         </div>
 
-        <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;" onload="if(isSubmitting) handleFinish();"></iframe>
-
         <div id="rent-section" class="section active">
-            <form id="rent-form" action="https://script.google.com/macros/s/AKfycbyhszIsXtjIzFo4_UCj8-OwB401LHFxhfuPT78jKWbG4zwQEWnIzYtpCO9f071hShPxTQ/exec" method="POST" target="hidden_iframe" onsubmit="return validateRent()">
-                <input type="hidden" name="action" value="rent">
+            <form id="rent-form" onsubmit="return handleRentSubmit()">
                 <label class="input-label">학년 / 반 / 번호</label>
                 <div class="id-grid">
-                    <input type="number" name="grade" id="rg" placeholder="학년" required>
-                    <input type="number" name="classNum" id="rc" placeholder="반" required>
-                    <input type="number" name="studentNum" id="rn" placeholder="번호" required>
+                    <input type="number" id="rg" placeholder="학년" required>
+                    <input type="number" id="rc" placeholder="반" required>
+                    <input type="number" id="rn" placeholder="번호" required>
                 </div>
                 <label class="input-label">이름</label>
-                <input type="text" name="name" id="rname" placeholder="실명 입력" required>
+                <input type="text" id="rname" placeholder="이름 입력" required style="margin-bottom:20px;">
                 <label class="input-label">연락처</label>
-                <input type="tel" name="phone" placeholder="01012345678" required>
+                <input type="tel" id="rphone" placeholder="01012345678" required>
                 <button type="submit" class="main-btn">대여 신청하기</button>
             </form>
         </div>
@@ -74,27 +72,22 @@
                 <input type="number" id="cn" placeholder="번호">
             </div>
             <label class="input-label">이름</label>
-            <input type="text" id="cname" placeholder="성함 입력">
+            <input type="text" id="cname" placeholder="대여 시 입력한 이름" style="margin-bottom:20px;">
             <button type="button" class="main-btn" style="background:#666;" onclick="checkStatus()">대여 정보 조회</button>
 
             <div id="status-card" class="status-card">
                 <p><strong id="info-text" style="font-size:1.1rem; color:var(--primary-color);"></strong></p>
                 <p id="time-text" style="font-size:0.85rem; color:#888; margin-bottom:15px;"></p>
-                <form id="return-form" action="https://script.google.com/macros/s/AKfycbyhszIsXtjIzFo4_UCj8-OwB401LHFxhfuPT78jKWbG4zwQEWnIzYtpCO9f071hShPxTQ/exec" method="POST" target="hidden_iframe" onsubmit="isSubmitting=true; showLoading();">
-                    <input type="hidden" name="action" value="return">
-                    <input type="hidden" name="grade" id="hg"><input type="hidden" name="classNum" id="hc">
-                    <input type="hidden" name="studentNum" id="hn"><input type="hidden" name="name" id="hname">
-                    <button type="submit" class="main-btn" style="background:var(--accent-color);">반납 완료하기</button>
-                </form>
+                <button type="button" class="main-btn" style="background:var(--accent-color);" onclick="handleReturnSubmit()">반납 완료하기</button>
             </div>
-            <p id="no-data" style="display:none; color:var(--accent-color); text-align:center; font-weight:bold; margin-top:20px;">대여 내역이 없습니다.</p>
+            <p id="no-data" style="display:none; color:var(--accent-color); text-align:center; font-weight:bold; margin-top:20px;">일치하는 대여 내역이 없습니다.</p>
         </div>
 
         <div id="admin-section" class="section">
             <label class="input-label">관리자 비밀번호</label>
-            <input type="password" id="admin-pw" placeholder="비밀번호 입력">
+            <input type="password" id="admin-pw" placeholder="비밀번호 입력" style="margin-bottom:20px;">
             <label class="input-label">조회할 학급</label>
-            <div class="id-grid">
+            <div class="id-grid" style="grid-template-columns: 1fr 1fr;">
                 <input type="number" id="ag" placeholder="학년">
                 <input type="number" id="ac" placeholder="반">
             </div>
@@ -112,8 +105,8 @@
 </div>
 
 <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyhszIsXtjIzFo4_UCj8-OwB401LHFxhfuPT78jKWbG4zwQEWnIzYtpCO9f071hShPxTQ/exec";
-    let isSubmitting = false;
+    // ⚠️ 중요: 아래 주소에 새로 배포한 구글 웹 앱 URL 주소를 정확하게 붙여넣으세요.
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxIGlpLqA9r5N-P5QJGFZsMP7bA8zSkLx2OBybH9NV2AasQ5Ks8t9goxxWJqI5PYp58xg/exec";
 
     function showSection(s) {
         document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
@@ -123,31 +116,55 @@
     }
 
     function showLoading() { document.getElementById('loading').style.display = 'flex'; }
+    function hideLoading() { document.getElementById('loading').style.display = 'none'; }
+    function showSuccess() {
+        document.getElementById('main-ui').style.display = 'none';
+        document.getElementById('success-ui').style.display = 'block';
+    }
 
-    function validateRent() {
-        const g = document.getElementById('rg').value, c = document.getElementById('rc').value, n = document.getElementById('rn').value;
+    // 1. 대여 신청 처리 (중복 체크 후 Fetch POST로 밀림 현상 방지)
+    function handleRentSubmit() {
+        const g = document.getElementById('rg').value;
+        const c = document.getElementById('rc').value;
+        const n = document.getElementById('rn').value;
         if(!g || !c || !n) return false;
+
         showLoading();
         const script = document.createElement('script');
-        script.src = `${SCRIPT_URL}?action=check&grade=${g}&classNum=${c}&studentNum=${n}&callback=confirmRent`;
+        script.src = `${SCRIPT_URL}?action=check&grade=${g}&classNum=${c}&studentNum=${n}&callback=confirmAndPostRent`;
         document.body.appendChild(script);
         document.body.removeChild(script);
         return false; 
     }
 
-    function confirmRent(res) {
+    function confirmAndPostRent(res) {
         if(res.status === "renting") {
-            document.getElementById('loading').style.display = 'none';
-            alert("⚠️ 이미 대여 중인 번호입니다.");
-        } else {
-            isSubmitting = true;
-            document.getElementById('rent-form').submit(); 
+            hideLoading();
+            alert("⚠️ 현재 대여 중인 기기입니다. 반납을 먼저 진행해 주세요.");
+            return;
         }
+
+        const formData = new URLSearchParams();
+        formData.append('action', 'rent');
+        formData.append('grade', document.getElementById('rg').value);
+        formData.append('classNum', document.getElementById('rc').value);
+        formData.append('studentNum', document.getElementById('rn').value);
+        formData.append('name', document.getElementById('rname').value);
+        formData.append('phone', document.getElementById('rphone').value);
+
+        fetch(SCRIPT_URL, { method: 'POST', body: formData })
+        .then(() => { hideLoading(); showSuccess(); })
+        .catch(err => { hideLoading(); alert("오류가 발생했습니다. 다시 시도해 주세요."); });
     }
 
+    // 2. 대여 상태 조회
     function checkStatus() {
-        const g = document.getElementById('cg').value, c = document.getElementById('cc').value, n = document.getElementById('cn').value, name = document.getElementById('cname').value;
-        if(!g || !c || !n || !name) return alert("모든 정보를 입력하세요.");
+        const g = document.getElementById('cg').value;
+        const c = document.getElementById('cc').value;
+        const n = document.getElementById('cn').value;
+        const name = document.getElementById('cname').value;
+        if(!g || !c || !n || !name) return alert("정보를 모두 입력하세요.");
+
         showLoading();
         const script = document.createElement('script');
         script.src = `${SCRIPT_URL}?action=check&grade=${g}&classNum=${c}&studentNum=${n}&name=${encodeURIComponent(name)}&callback=showResult`;
@@ -156,21 +173,35 @@
     }
 
     function showResult(res) {
-        document.getElementById('loading').style.display = 'none';
-        const card = document.getElementById('status-card'), noData = document.getElementById('no-data');
+        hideLoading();
+        const card = document.getElementById('status-card');
+        const noData = document.getElementById('no-data');
+
         if(res.status === "renting") {
             document.getElementById('info-text').innerText = `${res.name} 학생 - 대여 중`;
             document.getElementById('time-text').innerText = `대여 일시: ${res.time}`;
-            document.getElementById('hg').value = document.getElementById('cg').value;
-            document.getElementById('hc').value = document.getElementById('cc').value;
-            document.getElementById('hn').value = document.getElementById('cn').value;
-            document.getElementById('hname').value = document.getElementById('cname').value;
             card.style.display = 'block'; noData.style.display = 'none';
         } else {
             card.style.display = 'none'; noData.style.display = 'block';
         }
     }
 
+    // 3. 반납 처리 완료 버튼 클릭 시
+    function handleReturnSubmit() {
+        showLoading();
+        const formData = new URLSearchParams();
+        formData.append('action', 'return');
+        formData.append('grade', document.getElementById('cg').value);
+        formData.append('classNum', document.getElementById('cc').value);
+        formData.append('studentNum', document.getElementById('cn').value);
+        formData.append('name', document.getElementById('cname').value);
+
+        fetch(SCRIPT_URL, { method: 'POST', body: formData })
+        .then(() => { hideLoading(); showSuccess(); })
+        .catch(err => { hideLoading(); alert("반납 처리 중 오류가 발생했습니다."); });
+    }
+
+    // 4. 관리자 학급 조회 기능
     function checkAdmin() {
         const pw = document.getElementById('admin-pw').value, g = document.getElementById('ag').value, c = document.getElementById('ac').value;
         if(!pw || !g || !c) return alert("비밀번호와 학급 정보를 입력하세요.");
@@ -182,7 +213,7 @@
     }
 
     function renderAdminList(res) {
-        document.getElementById('loading').style.display = 'none';
+        hideLoading();
         const listDiv = document.getElementById('admin-list');
         listDiv.innerHTML = '';
         if(res.status === "error") return alert(res.msg);
@@ -197,14 +228,6 @@
             listDiv.appendChild(div);
         });
     }
-
-    function handleFinish() {
-        isSubmitting = false;
-        document.getElementById('loading').style.display = 'none';
-        document.getElementById('main-ui').style.display = 'none';
-        document.getElementById('success-ui').style.display = 'block';
-    }
 </script>
 </body>
 </html>
-
