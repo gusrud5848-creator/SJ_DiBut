@@ -64,10 +64,10 @@
                 <label class="input-label">학부모 동의를 받았습니까?</label>
                 <div style="display: flex; gap: 30px; margin-bottom: 20px; padding: 5px 10px;">
                     <label style="display: flex; align-items: center; gap: 8px; font-size: 1rem; cursor: pointer; color: #333;">
-                        <input type="radio" name="parentConsent" value="예" required style="width: auto; cursor: pointer;"> 예
+                        <input type="radio" name="parentConsent" id="consent-yes" value="예" required style="width: auto; cursor: pointer;"> 예
                     </label>
                     <label style="display: flex; align-items: center; gap: 8px; font-size: 1rem; cursor: pointer; color: #333;">
-                        <input type="radio" name="parentConsent" value="아니오" required style="width: auto; cursor: pointer;"> 아니오
+                        <input type="radio" name="parentConsent" id="consent-no" value="아니오" required style="width: auto; cursor: pointer;"> 아니오
                     </label>
                 </div>
 
@@ -122,8 +122,14 @@
 
     function showLoading() { document.getElementById('loading').style.display = 'flex'; }
 
-    // 대여 전 중복 체크
+    // 대여 전 검증 (동의 여부 '아니오' 체크 차단 및 중복 체크)
     function validateRent() {
+        // 🌟 '아니오'가 체크되어 있는지 검사
+        if (document.getElementById('consent-no').checked) {
+            alert("⚠️ 학부모 동의 이후 대여 신청해주세요.");
+            return false; // 데이터 전송 중단
+        }
+
         const g = document.getElementById('rg').value;
         const c = document.getElementById('rc').value;
         const n = document.getElementById('rn').value;
@@ -147,7 +153,6 @@
         }
     }
 
-    // 전송 완료 후 호출되는 함수
     function handleFinish() {
         isSubmitting = false;
         document.getElementById('loading').style.display = 'none';
