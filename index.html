@@ -135,12 +135,12 @@
 
     function showLoading() { document.getElementById('loading').style.display = 'flex'; }
 
-// 대여 전 검증 (동의 여부 '아니오' 체크 차단 및 중복 체크)
+    // 대여 전 검증 (중복 함수를 하나로 깔끔하게 합쳤습니다)
     function validateRent() {
-        // 🌟 '아니오'가 체크되어 있는지 검사
+        // 1. '아니오'가 체크되어 있다면 즉시 전송을 차단하고 안내창을 띄웁니다.
         if (document.getElementById('consent-no').checked) {
             alert("⚠️ 학부모 동의 이후 대여 신청해주세요.");
-            return false; // 데이터 전송 중단
+            return false; 
         }
 
         const g = document.getElementById('rg').value;
@@ -156,18 +156,7 @@
         return false; 
     }
 
-    function validateRent() {
-        const g = document.getElementById('rg').value, c = document.getElementById('rc').value, n = document.getElementById('rn').value;
-        if(!g || !c || !n) return false;
-        showLoading();
-        const script = document.createElement('script');
-        script.src = `${SCRIPT_URL}?action=check&grade=${g}&classNum=${c}&studentNum=${n}&callback=confirmRent`;
-        document.body.appendChild(script);
-        document.body.removeChild(script);
-        return false; 
-    }
-
-function confirmRent(res) {
+    function confirmRent(res) {
         if(res.status === "renting") {
             document.getElementById('loading').style.display = 'none';
             alert("⚠️ 현재 대여 중인 기기입니다. 반납을 먼저 진행해 주세요.");
